@@ -1,56 +1,27 @@
 class Solution {
 public:
-    int minCost(vector<vector<int>>& grid) {
-        // init
-        int m = grid.size(), n = grid[0].size();
-        vector<vector<int>> cost(m, vector<int>(n, INT_MAX));
-        vector<vector<bool>> visit(m, vector<bool>(n, false));
-        queue<pair<int, int>> q;
-        cost[m - 1][n - 1] = 0; visit[m - 1][n - 1] = true; q.push({m - 1, n - 1});
-        // bfs
-        while (!q.empty()) {
-            int t = q.size();
-            while (t--) {
-                auto cur = q.front(); q.pop();
-                int i = cur.first, j = cur.second, c = cost[i][j];
-                // move from left: grid[i][j - 1]
-                if (j - 1 >= 0) {
-                    int pre = cost[i][j - 1];
-                    cost[i][j - 1] = min(cost[i][j - 1], c + (grid[i][j - 1] != 1));
-                    if (!visit[i][j - 1] || pre != cost[i][j - 1]) {
-                        visit[i][j - 1] = true;
-                        q.push({i, j - 1});
-                    }
-                }
-                // move from right: grid[i][j + 1]
-                if (j + 1 < n) {
-                    int pre = cost[i][j + 1];
-                    cost[i][j + 1] = min(cost[i][j + 1], c + (grid[i][j + 1] != 2));
-                    if (!visit[i][j + 1] || pre != cost[i][j + 1]) {
-                        visit[i][j + 1] = true;
-                        q.push({i, j + 1});
-                    }
-                }
-                // move from top grid[i - 1][j]
-                if (i - 1 >= 0) {
-                    int pre = cost[i - 1][j];
-                    cost[i - 1][j] = min(cost[i - 1][j], c + (grid[i - 1][j] != 3));
-                    if (!visit[i - 1][j] || pre != cost[i - 1][j]) {
-                        visit[i - 1][j] = true;
-                        q.push({i - 1, j});
-                    }
-                }
-                // move from bottom grid[i + 1][j]
-                if (i + 1 < m) {
-                    int pre = cost[i + 1][j];
-                    cost[i + 1][j] = min(cost[i + 1][j], c + (grid[i + 1][j] != 4));
-                    if (!visit[i + 1][j] || pre != cost[i + 1][j]) {
-                        visit[i + 1][j] = true;
-                        q.push({i + 1, j});
-                    }
-                }
-            }
-        }
-        return cost[0][0];
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        int h = matrix.size(), w = (h ? matrix[0].size():0); //Declare "h" and assign size of matrix to "h".
+                                                             //Declare "w" and assign "h" position of matrix, else 0.
+        vector<vector<int>> dp(h, vector<int> (w, 0)); //Declare vector of vector "dp".
+        int maxlen = 0; //Declare maxlen (maximum length) and initialize it to 0.
+        for (int i = 0; i < h; ++i) //Loop through matrix, left to right each row.
+            for (int j = 0; j < w; ++j) 
+                maxlen = max(maxlen, dfsSearch(matrix, dp, INT_MIN, i, j)); //Assign DFS searching through matrix to maxlen.
+        return maxlen; //Return the maximum length.
+    }
+    int dfsSearch(vector<vector<int>> &mat, vector<vector<int>> &dp, int prev, int i, int j) { //DFS Function
+        int h = mat.size(), w = mat[0].size(); //Declare "h" and assign matrix size. Declare "w" and assign position of matrix.
+        if (prev >= mat[i][j]) return 0; //If prev is greater than or equal to matrix, return 0.
+        if (dp[i][j])  return dp[i][j]; //Return depth.
+        
+        int val = mat[i][j]; //Declare val and assign matrix to val.
+        int d[4] = {
+            i ? dfsSearch(mat, dp, val, i-1, j):0, //Up, recursing through DFS function.
+            i+1 < h ? dfsSearch(mat, dp, val, i+1, j):0, //Down, recursing through DFS function.
+            j ? dfsSearch(mat, dp, val, i, j-1):0, //Left, recursing through DFS function.
+            j+1 < w ? dfsSearch(mat, dp, val, i, j+1):0 //Right, recursing through DFS function.
+        };
+        return dp[i][j] = max(d[0], max(d[1], max(d[2], d[3]))) + 1; //Return for all rows.
     }
 };
